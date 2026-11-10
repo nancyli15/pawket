@@ -15,4 +15,5 @@ export type Position = {
   quantity: number; // shares you own now
   bookValue: number; // total you paid for the shares you still own
   averageCost: number; // bookValue ÷ quantity
+  realizedGain: number; // money locked in by sells: (sale price − average cost) × shares sold, added up
 };
