@@ -1,4 +1,5 @@
-// Ledger's data model
+// Ledger's data model - A list of trades in order
+// Trade goes in, Position comes out, ValuedPosition is Position w/ today's price applied.
 
 // one buy or sell of a stock; positions are worked out from list of trades
 export type Trade = {
