@@ -17,3 +17,9 @@ export type Position = {
   averageCost: number; // bookValue ÷ quantity
   realizedGain: number; // money locked in by sells: (sale price − average cost) × shares sold, added up
 };
+
+// A position plus what it's worth at today's price. null = no price available.
+export type ValuedPosition = Position & {
+  marketValue: number | null; // quantity × current price
+  unrealizedGain: number | null; // marketValue − bookValue: gain on paper, not locked in
+};

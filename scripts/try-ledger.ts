@@ -2,6 +2,7 @@
 // Not part of the app or the tests; just for checking the maths by eye.
 import { computePositions } from "../lib/ledger/positions";
 import type { Trade } from "../lib/ledger/types";
+import { valuePositions } from "../lib/ledger/value";
 
 const trades: Trade[] = [
   { symbol: "XEQT", side: "sell", quantity: 1,  price: 25,  date: "2026-11-13" },
@@ -15,5 +16,8 @@ const trades: Trade[] = [
 console.log("Input (trades):");
 console.table(trades);
 
-console.log("Output (positions):");
-console.table(computePositions(trades));
+// Today's price per share. Remove one to see a missing price (null).
+const prices: Record<string, number> = { VFV: 125, XEQT: 32 };
+
+console.log("Output (positions at today's prices):");
+console.table(valuePositions(computePositions(trades), prices));
