@@ -1,34 +1,51 @@
 import type { Position, Trade } from "./types";
 
-// Takes the user's list of trades and works out what they own in each stock and what they paid
-
-// Called wehnever the app needs to show positions and replays the whole trade history in the order given (future: sort by date)
+// Replays all trades (oldest first) into one position per stock.
 export function computePositions(trades: Trade[]): Position[] {
-  
-  // The notebook: one page per stock that holds running totals
-  // e.g. "VFV" page --> quantity: 20, bookValue: 2200
-  const totals = new Map<string, { quantity: number; bookValue: number }>();
+  // Copy before sorting so the caller's list isn't changed
+  const sorted = [...trades].sort((a, b) => a.date.localeCompare(b.date));
 
-  // Replay each trade: read its stock's page, add to it, write it back
-  for (const trade of trades) {
-    // Only buys are handled for now
-    if (trade.side === "sell") {
-      throw new Error("Sells aren't supported yet");
+  // Notebook: one page of running totals per stock
+  const totals = new Map<string, { quantity: number; bookValue: number; realizedGain: number }>();
+
+  for (const trade of sorted) {
+    const current = totals.get(trade.symbol) ?? { quantity: 0, bookValue: 0, realizedGain: 0 };
+
+    if (trade.side === "buy") {
+      totals.set(trade.symbol, {
+        quantity: current.quantity + trade.quantity,
+        bookValue: current.bookValue + trade.quantity * trade.price,
+        realizedGain: current.realizedGain,
+      });
+    } 
+    // Otherwise transaction is sell
+    else {
+      // Can't sell more than you own
+      if (trade.quantity > current.quantity) {
+        throw new Error(
+          `Can't sell ${trade.quantity} ${trade.symbol} on ${trade.date}: you own ${current.quantity}`,
+        );
+      }
+
+      // Sells remove shares at the average cost, so the average doesn't change
+      const averageCost = current.bookValue / current.quantity;
+      const quantityLeft = current.quantity - trade.quantity;
+
+      totals.set(trade.symbol, {
+        quantity: quantityLeft,
+        // If exactly 0 when sold out, so no rounding crumbs remain 
+        bookValue: quantityLeft === 0 ? 0 : current.bookValue - trade.quantity * averageCost,
+        realizedGain: current.realizedGain + (trade.price - averageCost) * trade.quantity,
+      });
     }
-    // Open this stock's page. If it has no page yet, start from 0 shares and $0
-    const current = totals.get(trade.symbol) ?? { quantity: 0, bookValue: 0 };
-    
-    // Write the updated page back into the notebook
-    totals.set(trade.symbol, {
-      quantity: current.quantity + trade.quantity, // shares so far + shares in this trade
-      bookValue: current.bookValue + trade.quantity * trade.price, // money so far + this trade's cost
-    });
   }
-  // After the replay: turn each notebook page into a position with worked out average cost 
-  return [...totals].map(([symbol, { quantity, bookValue }]) => ({
+
+  // Sold-out stocks stay (0 shares) so their realized gain still shows
+  return [...totals].map(([symbol, { quantity, bookValue, realizedGain }]) => ({
     symbol,
     quantity,
     bookValue,
-    averageCost: bookValue / quantity, 
+    averageCost: quantity === 0 ? 0 : bookValue / quantity,
+    realizedGain,
   }));
 }
