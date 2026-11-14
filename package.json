@@ -9,9 +9,11 @@
     "lint": "eslint",
     "test": "vitest run",
     "try": "tsx scripts/try-ledger.ts",
-    "check": "tsx scripts/check-real.ts"
+    "check": "tsx scripts/check-real.ts",
+    "db:setup": "tsx --env-file=.env.development.local scripts/db-setup.ts"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.2.1",
     "next": "16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0"
