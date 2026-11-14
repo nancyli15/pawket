@@ -23,4 +23,5 @@ export type Position = {
 export type ValuedPosition = Position & {
   marketValue: number | null; // quantity × current price
   unrealizedGain: number | null; // marketValue − bookValue: gain on paper, not locked in
+  simpleReturn: number | null; // unrealizedGain ÷ bookValue, as a fraction (0.136 = 13.6%)
 };

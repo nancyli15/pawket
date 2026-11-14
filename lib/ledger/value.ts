@@ -8,16 +8,23 @@ export function valuePositions(
   return positions.map((position) => {
     // Sold out: worth $0, no price needed
     if (position.quantity === 0) {
-      return { ...position, marketValue: 0, unrealizedGain: 0 };
+      return { ...position, marketValue: 0, unrealizedGain: 0, simpleReturn: null };
     }
 
     const price = prices[position.symbol];
     // No price: unknown, not $0 (which would look like a total loss)
     if (price === undefined) {
-      return { ...position, marketValue: null, unrealizedGain: null };
+      return { ...position, marketValue: null, unrealizedGain: null, simpleReturn: null };
     }
 
     const marketValue = position.quantity * price;
-    return { ...position, marketValue, unrealizedGain: marketValue - position.bookValue };
+    const unrealizedGain = marketValue - position.bookValue;
+    return {
+      ...position,
+      marketValue,
+      unrealizedGain,
+      // How much the shares still held have grown; e.g. 225 ÷ 1650 = 0.136 (13.6%)
+      simpleReturn: unrealizedGain / position.bookValue,
+    };
   });
 }
