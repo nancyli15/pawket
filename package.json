@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "try": "tsx scripts/try-ledger.ts"
+    "try": "tsx scripts/try-ledger.ts",
+    "check": "tsx scripts/check-real.ts"
   },
   "dependencies": {
     "next": "16.4.6",
