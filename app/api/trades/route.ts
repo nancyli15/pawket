@@ -13,7 +13,9 @@ export async function GET() {
 // POST /api/trades: save one practice trade, e.g. { symbol, side, quantity, price, date }
 export async function POST(request: Request) {
   await connection();
-  const parsed = parseTrade(await request.json().catch(() => null));
+  const body = await request.json().catch(() => undefined);
+  if (body === undefined) return Response.json({error: "body must be valid JSON"}, { status: 400}); // undefined instead of null since null is valid JSON
+  const parsed = parseTrade(body);
   if ("error" in parsed) return Response.json({ error: parsed.error }, { status: 400 });
 
   // Replay with the new trade first, so a sell of shares you don't own is never saved
