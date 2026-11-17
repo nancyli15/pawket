@@ -25,6 +25,10 @@ describe("parseTrade", () => {
     expect(parseTrade({ ...good, quantity: 0 })).toHaveProperty("error");
     expect(parseTrade({ ...good, price: "100" })).toHaveProperty("error");
     expect(parseTrade({ ...good, date: "Nov 10" })).toHaveProperty("error");
-    expect(parseTrade(null)).toHaveProperty("error");
+  });
+  it("says so when nothing was sent", () => {
+    const empty = { error: "body is empty: send symbol, side, quantity, price and date" };
+    expect(parseTrade({})).toEqual(empty);
+    expect(parseTrade(null)).toEqual(empty);
   });
 });

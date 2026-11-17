@@ -21,6 +21,8 @@ export function parseTrade(body: unknown): { trade: Trade } | { error: string } 
   const symbol = typeof input.symbol === "string" ? input.symbol.trim().toUpperCase() : "";
   const { side, quantity, price, date } = input;
 
+
+  if (Object.keys(input).length === 0) { return { error: "body is empty: send symbol, side, quantity, price and date" }; }
   if (!symbol) return { error: "symbol is required, e.g. \"VFV\"" };
   if (side !== "buy" && side !== "sell") return { error: "side must be \"buy\" or \"sell\"" };
   if (typeof quantity !== "number" || !(quantity > 0)) return { error: "quantity must be a number above 0" };
