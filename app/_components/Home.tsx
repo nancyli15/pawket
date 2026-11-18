@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getMe, type Me } from "@/lib/client/api";
 import CompareSection from "./CompareSection";
+import PracticeSection from "./PracticeSection";
 
 export default function Home() {
   const [me, setMe] = useState<Me | null>(null); // null while loading
@@ -33,7 +34,12 @@ export default function Home() {
         </section>
       )}
 
-      {me?.signedIn && <CompareSection />}
+      {me?.signedIn && (
+        <>
+          <PracticeSection />
+          <CompareSection />
+        </>
+      )}
     </main>
   );
 }

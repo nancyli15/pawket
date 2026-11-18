@@ -31,7 +31,9 @@ export default function CompareSection() {
         <div key={i} className="rounded-lg border border-line bg-card p-4">
           <h3 className="font-semibold">{account.account}</h3>
           <p className="text-sm text-muted">
-            {account.tradesUsed} trades used, {account.unhandled} other activities set aside
+            {account.tradesUsed + account.unhandled} activities from SnapTrade → {account.tradesUsed} buys and sells
+            replayed through Pawket&apos;s ledger ({account.unhandled} other activities, like dividends, set aside) →
+            positions below
           </p>
           {account.error && <p className="mt-2 text-sm text-danger">Pawket couldn&apos;t replay this account: {account.error}</p>}
           {account.rows.length > 0 && (
