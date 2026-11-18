@@ -48,3 +48,8 @@ export async function saveSession(session: Session): Promise<void> {
 export async function getSession(): Promise<Session | null> {
   return unseal<Session>((await cookies()).get(SESSION_COOKIE)?.value);
 }
+
+// Signs the user out by deleting the session cookie
+export async function clearSession(): Promise<void> {
+  (await cookies()).delete(SESSION_COOKIE);
+}
