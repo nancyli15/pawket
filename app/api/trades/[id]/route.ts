@@ -1,15 +1,17 @@
 import { connection } from "next/server";
 import { deleteTrade, listTrades } from "@/lib/db/practiceTrades";
-import { DEMO_USER } from "@/lib/api/practice";
+import { notSignedIn, signedInUser } from "@/lib/api/practice";
 import { computePositions } from "@/lib/ledger/positions";
 
 // DELETE /api/trades/7: remove one practice trade
 export async function DELETE(_request: Request, ctx: RouteContext<"/api/trades/[id]">) {
   await connection();
+  const userId = await signedInUser();
+  if (!userId) return notSignedIn();
   const id = Number((await ctx.params).id);
   if (!Number.isInteger(id)) return Response.json({ error: "id must be a number" }, { status: 400 });
 
-  const trades = await listTrades(DEMO_USER);
+  const trades = await listTrades(userId);
   if (!trades.some((t) => t.id === id)) return Response.json({ error: "No such trade" }, { status: 404 });
 
   // Deleting a buy could leave a later sell with no shares behind it
@@ -21,6 +23,6 @@ export async function DELETE(_request: Request, ctx: RouteContext<"/api/trades/[
       { status: 409 },
     );
   }
-  await deleteTrade(DEMO_USER, id);
+  await deleteTrade(userId, id);
   return new Response(null, { status: 204 });
 }

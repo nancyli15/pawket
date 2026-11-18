@@ -1,18 +1,22 @@
 import { connection } from "next/server";
 import { addTrade, listTrades } from "@/lib/db/practiceTrades";
-import { DEMO_USER } from "@/lib/api/practice";
+import { notSignedIn, signedInUser } from "@/lib/api/practice";
 import { parseTrade } from "@/lib/api/requests";
 import { computePositions } from "@/lib/ledger/positions";
 
 // GET /api/trades: every saved practice trade, oldest first
 export async function GET() {
   await connection();
-  return Response.json(await listTrades(DEMO_USER));
+  const userId = await signedInUser();
+  if (!userId) return notSignedIn();
+  return Response.json(await listTrades(userId));
 }
 
 // POST /api/trades: save one practice trade, e.g. { symbol, side, quantity, price, date }
 export async function POST(request: Request) {
   await connection();
+  const userId = await signedInUser();
+  if (!userId) return notSignedIn();
   const body = await request.json().catch(() => undefined);
   if (body === undefined) return Response.json({error: "body must be valid JSON"}, { status: 400}); // undefined instead of null since null is valid JSON
   const parsed = parseTrade(body);
@@ -20,9 +24,9 @@ export async function POST(request: Request) {
 
   // Replay with the new trade first, so a sell of shares you don't own is never saved
   try {
-    computePositions([...(await listTrades(DEMO_USER)), parsed.trade]);
+    computePositions([...(await listTrades(userId)), parsed.trade]);
   } catch (error) {
     return Response.json({ error: (error as Error).message }, { status: 400 });
   }
-  return Response.json(await addTrade(DEMO_USER, parsed.trade), { status: 201 });
+  return Response.json(await addTrade(userId, parsed.trade), { status: 201 });
 }
